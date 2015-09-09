@@ -1,3 +1,4 @@
+using System.Linq;
 using CgmInfo.Commands.Enums;
 using CgmInfo.Commands.GraphicalPrimitives;
 using CgmInfo.Commands.MetafileDescriptor;
@@ -14,6 +15,13 @@ namespace CgmInfoGui.Traversal
             parameter.Visuals.VdcExtent = new Rect(maximumVdcExtent.FirstCorner.ToPoint(), maximumVdcExtent.SecondCorner.ToPoint());
         }
 
+        public override void AcceptGraphicalPrimitivePolyline(Polyline polyline, GraphicalElementContext parameter)
+        {
+            var line = new LineVisual(polyline.Points.ToPoints());
+            foreach (var point in polyline.Points.Select(p => p.ToPoint()))
+                parameter.IncreaseBounds(point);
+            parameter.Add(line);
+        }
         public override void AcceptGraphicalPrimitiveText(TextCommand text, GraphicalElementContext parameter)
         {
             var textVisual = new TextVisual(text.Text, text.Position.ToPoint());
