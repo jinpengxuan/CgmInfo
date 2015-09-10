@@ -123,6 +123,7 @@
     <Compile Include="ViewModels\Nodes\UnsupportedCounter.cs" />
     <Compile Include="ViewModels\Nodes\UnsupportedNode.cs" />
     <Compile Include="Visuals\CircleVisual.cs" />
+    <Compile Include="Visuals\EllipseVisual.cs" />
     <Compile Include="Visuals\LineVisual.cs" />
     <Compile Include="Visuals\RectangleVisual.cs" />
     <Compile Include="Visuals\TextVisual.cs" />
