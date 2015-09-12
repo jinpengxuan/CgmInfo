@@ -128,6 +128,7 @@
     <Compile Include="Visuals\RectangleVisual.cs" />
     <Compile Include="Visuals\TextVisual.cs" />
     <Compile Include="Visuals\VisualBase.cs" />
+    <Compile Include="Visuals\VisualContext.cs" />
     <Compile Include="Visuals\VisualRoot.cs" />
     <Page Include="Controls\PropertiesPanel.xaml">
       <Generator>MSBuild:Compile</Generator>

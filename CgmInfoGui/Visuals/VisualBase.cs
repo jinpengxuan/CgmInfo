@@ -4,7 +4,7 @@ namespace CgmInfoGui.Visuals
 {
     public abstract class VisualBase
     {
-        protected internal abstract void DrawTo(DrawingContext drawingContext);
+        protected internal abstract void DrawTo(DrawingContext drawingContext, VisualContext visualContext);
         private static Pen Black;
         protected static Pen GetBlack()
         {

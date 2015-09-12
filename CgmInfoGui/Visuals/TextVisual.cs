@@ -14,10 +14,10 @@ namespace CgmInfoGui.Visuals
         public string Text { get; set; }
         public Point Location { get; private set; }
 
-        protected internal override void DrawTo(DrawingContext drawingContext)
+        protected internal override void DrawTo(DrawingContext drawingContext, VisualContext visualContext)
         {
             var formattedText = new FormattedText(Text, CultureInfo.GetCultureInfo("en"), FlowDirection.LeftToRight, new Typeface(new FontFamily("Arial"), new FontStyle(), new FontWeight(), new FontStretch()), 12, Brushes.Black);
-            drawingContext.DrawText(formattedText, Location);
+            drawingContext.DrawText(formattedText, visualContext.Correct(Location));
         }
     }
 }
