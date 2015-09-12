@@ -78,6 +78,7 @@ namespace CgmInfoGui.Controls
             set { SetValue(DirectionYProperty, value); }
         }
 
+        private bool _needsUpdate = true;
         private readonly VisualCollection _visuals;
         public VisualCanvas()
         {
@@ -95,12 +96,10 @@ namespace CgmInfoGui.Controls
         }
         protected virtual void OnItemsSourceChanged(DependencyPropertyChangedEventArgs args)
         {
-            _visuals.Clear();
-            ResetSize();
-
             if (args.NewValue is List<VisualBase> newList)
             {
-                CreateVisuals(newList);
+                _needsUpdate = true;
+                InvalidateVisual();
             }
         }
 
@@ -137,11 +136,14 @@ namespace CgmInfoGui.Controls
         {
             if (args.NewValue is Rect newExtent)
             {
-                UpdateSize(newExtent);
+                _needsUpdate = true;
+                InvalidateVisual();
             }
         }
         private void CreateVisuals(List<VisualBase> list)
         {
+            if (list == null)
+                return;
             var visualContext = new VisualContext(GeometryExtent, DirectionX, DirectionY);
             foreach (var item in list)
             {
@@ -161,6 +163,14 @@ namespace CgmInfoGui.Controls
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            if (_needsUpdate)
+            {
+                _needsUpdate = false;
+                _visuals.Clear();
+                ResetSize();
+                UpdateSize(GeometryExtent);
+                CreateVisuals(ItemsSource);
+            }
             drawingContext.DrawRectangle(VdcExtentBrush, VdcExtentPen, VdcExtent);
             drawingContext.DrawRectangle(GeometryExtentBrush, GeometryExtentPen, GeometryExtent);
             base.OnRender(drawingContext);
