@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Windows.Media;
+using CgmInfo.Commands.Attributes;
 using CgmInfo.Commands.Enums;
 using CgmInfo.Commands.GraphicalPrimitives;
 using CgmInfo.Commands.MetafileDescriptor;
@@ -6,6 +8,7 @@ using CgmInfo.Commands.PictureDescriptor;
 using CgmInfo.Traversal;
 using CgmInfoGui.Visuals;
 using Rect = System.Windows.Rect;
+using Size = System.Windows.Size;
 
 namespace CgmInfoGui.Traversal
 {
@@ -20,6 +23,42 @@ namespace CgmInfoGui.Traversal
             parameter.SetExtent(vdcExtent.FirstCorner.ToPoint(), vdcExtent.SecondCorner.ToPoint());
         }
 
+        public override void AcceptAttributeCharacterExpansionFactor(CharacterExpansionFactor characterExpansionFactor, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.CharacterExpansionFactor = characterExpansionFactor.Factor;
+        }
+        public override void AcceptAttributeCharacterHeight(CharacterHeight characterHeight, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.CharacterHeight = characterHeight.Height;
+        }
+        public override void AcceptAttributeCharacterSpacing(CharacterSpacing characterSpacing, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.CharacterSpacing = characterSpacing.AdditionalIntercharacterSpace;
+        }
+        public override void AcceptAttributeTextColor(TextColor textColor, GraphicalElementContext parameter)
+        {
+            var color = textColor.Color.GetColor();
+            var textBrush = new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B));
+            textBrush.Freeze();
+            parameter.TextAttributes.TextColor = textBrush;
+        }
+        public override void AcceptAttributeTextAlignment(TextAlignment textAlignment, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.TextAlignment = textAlignment;
+        }
+        public override void AcceptAttributeTextPath(TextPath textPath, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.TextPath = textPath.Path;
+        }
+        public override void AcceptAttributeTextFontIndex(TextFontIndex textFontIndex, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.FontIndex = textFontIndex.Index;
+        }
+        public override void AcceptMetafileDescriptorFontList(FontList fontList, GraphicalElementContext parameter)
+        {
+            parameter.TextAttributes.FontList = fontList.Fonts.ToArray();
+        }
+
         public override void AcceptGraphicalPrimitivePolyline(Polyline polyline, GraphicalElementContext parameter)
         {
             var line = new LineVisual(polyline.Points.ToPoints());
@@ -27,12 +66,13 @@ namespace CgmInfoGui.Traversal
                 parameter.IncreaseBounds(point);
             parameter.Add(line);
         }
+
         public override void AcceptGraphicalPrimitiveText(TextCommand text, GraphicalElementContext parameter)
         {
-            var textVisual = new TextVisual(text.Text, text.Position.ToPoint());
+            var textVisual = new TextVisual(text.Text, text.Position.ToPoint(), parameter.TextAttributes.GetFontFamily(), parameter.TextAttributes.CharacterHeight, parameter.TextAttributes.TextColor);
             parameter.IncreaseBounds(text.Position.ToPoint());
             if (text.Final == FinalFlag.Final)
-                parameter.LastText = null;
+                parameter.FinalizeText(textVisual);
             else
                 parameter.LastText = textVisual;
             parameter.Add(textVisual);
@@ -41,21 +81,26 @@ namespace CgmInfoGui.Traversal
         {
             if (parameter.LastText == null)
                 return;
+            // TODO: actually create two distinct items, because their text attributes might be different
             var textVisual = parameter.LastText;
             textVisual.Text += appendText.Text;
             if (appendText.Final == FinalFlag.Final)
+            {
                 parameter.LastText = null;
+                parameter.FinalizeText(textVisual);
+            }
         }
         public override void AcceptGraphicalPrimitiveRestrictedText(RestrictedText restrictedText, GraphicalElementContext parameter)
         {
-            var textVisual = new TextVisual(restrictedText.Text, restrictedText.Position.ToPoint());
-            parameter.IncreaseBounds(new Rect(restrictedText.Position.ToPoint(), new System.Windows.Size(restrictedText.DeltaWidth, restrictedText.DeltaHeight)));
+            var textVisual = new TextVisual(restrictedText.Text, restrictedText.Position.ToPoint(), parameter.TextAttributes.GetFontFamily(), parameter.TextAttributes.CharacterHeight, parameter.TextAttributes.TextColor);
+            parameter.IncreaseBounds(new Rect(restrictedText.Position.ToPoint(), new Size(restrictedText.DeltaWidth, restrictedText.DeltaHeight)));
             if (restrictedText.Final == FinalFlag.Final)
-                parameter.LastText = null;
+                parameter.FinalizeText(textVisual);
             else
                 parameter.LastText = textVisual;
             parameter.Add(textVisual);
         }
+
         public override void AcceptGraphicalPrimitivePolygon(Polygon polygon, GraphicalElementContext parameter)
         {
             var polygonVisual = new LineVisual(polygon.Points.ToPoints(), true);
