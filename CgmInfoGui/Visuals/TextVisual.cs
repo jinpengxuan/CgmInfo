@@ -22,6 +22,8 @@ namespace CgmInfoGui.Visuals
         public Brush FontBrush { get; }
         public FontFamily Font { get; }
 
+        internal static double PixelsPerDip { get; set; } = 1.0d;
+
         protected internal override void DrawTo(DrawingContext drawingContext, VisualContext visualContext)
         {
             var formattedText = CreateFormattedText();
@@ -35,7 +37,7 @@ namespace CgmInfoGui.Visuals
         internal FormattedText CreateFormattedText()
         {
             double preferredEmSize = Math.Min(FontSize, MaxFontEmSize);
-            return new FormattedText(Text, CultureInfo.GetCultureInfo("en"), FlowDirection.LeftToRight, new Typeface(Font, new FontStyle(), new FontWeight(), new FontStretch()), preferredEmSize, FontBrush);
+            return new FormattedText(Text, CultureInfo.GetCultureInfo("en"), FlowDirection.LeftToRight, new Typeface(Font, new FontStyle(), new FontWeight(), new FontStretch()), preferredEmSize, FontBrush, PixelsPerDip);
         }
     }
 }
